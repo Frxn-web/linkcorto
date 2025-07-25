@@ -494,19 +494,55 @@
         // Obtener parámetros de URL
         function getUrlParams() {
             const urlParams = new URLSearchParams(window.location.search);
+            const url = urlParams.get('url');
+            const shortId = urlParams.get('id');
+            
+            // Si no hay parámetros, mostrar página de demo
+            if (!url && !shortId) {
+                return {
+                    url: 'https://www.google.com',
+                    shortId: 'demo123',
+                    isDemo: true
+                };
+            }
+            
             return {
-                url: urlParams.get('url') || 'https://www.google.com',
-                shortId: urlParams.get('id') || 'demo123'
+                url: url || 'https://www.google.com',
+                shortId: shortId || 'unknown',
+                isDemo: false
             };
         }
 
         // Inicializar página
         function initializePage() {
             const params = getUrlParams();
-            targetUrl = decodeURIComponent(params.url);
+            
+            try {
+                targetUrl = params.url.startsWith('http') ? params.url : decodeURIComponent(params.url);
+            } catch (e) {
+                targetUrl = params.url;
+            }
             
             // Mostrar URL de destino
             document.getElementById('destinationUrl').textContent = targetUrl;
+            
+            // Si es demo, mostrar mensaje
+            if (params.isDemo) {
+                const demoMessage = document.createElement('div');
+                demoMessage.style.cssText = `
+                    background: #e3f2fd;
+                    border: 1px solid #2196f3;
+                    border-radius: 10px;
+                    padding: 15px;
+                    margin-bottom: 20px;
+                    color: #1976d2;
+                `;
+                demoMessage.innerHTML = `
+                    <strong>🧪 Modo Demo</strong><br>
+                    Esta es una demostración. Para usar enlaces reales, accede desde el acortador principal.
+                `;
+                document.querySelector('.redirect-section').insertBefore(demoMessage, document.querySelector('.countdown-container'));
+            }
             
             // Iniciar countdown
             startCountdown();
