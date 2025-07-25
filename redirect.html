@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirigiendo... | LinkShort</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔗</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 30px;
+            flex: 1;
+        }
+
+        .redirect-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            height: fit-content;
+        }
+
+        .countdown-container {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .countdown-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .countdown-number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: white;
+            z-index: 2;
+        }
+
+        .countdown-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: conic-gradient(from 0deg, transparent 0deg, rgba(255,255,255,0.3) 0deg);
+            transition: all 1s ease;
+        }
+
+        .countdown-text {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .destination-info {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 5px solid #667eea;
+        }
+
+        .destination-info h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .destination-url {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #e1e5e9;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 14px;
+            color: #495057;
+        }
+
+        .security-info {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .security-info .icon {
+            color: #28a745;
+            margin-right: 8px;
+        }
+
+        .continue-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .continue-btn.active {
+            opacity: 1;
+            cursor: pointer;
+            transform: translateY(0);
+        }
+
+        .continue-btn.active:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .ads-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .ad-unit {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border: 2px dashed #dee2e6;
+        }
+
+        .ad-unit h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .ad-unit p {
+            color: #6c757d;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .ad-placeholder {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 30px;
+            margin: 10px 0;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 3px;
+            transition: width 1s ease;
+            width: 0%;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .warning-box .icon {
+            color: #856404;
+            margin-right: 8px;
+        }
+
+        .stats-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        /* Anuncios intersticiales popup */
+        .popup-ad {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            z-index: 1000;
+            max-width: 400px;
+            width: 90%;
+            display: none;
+        }
+
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 999;
+            display: none;
+        }
+
+        .close-popup {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .ads-sidebar {
+                order: -1;
+            }
+            
+            .ad-unit {
+                min-height: 200px;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .redirect-section {
+                padding: 20px;
+            }
+            
+            .countdown-circle {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .countdown-number {
+                font-size: 2.5rem;
+            }
+        }
+
+        /* Animaciones */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .countdown-circle {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .redirect-section, .ad-unit {
+            animation: slideInUp 0.6s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <span>🔗</span>
+                LinkShort
+            </h1>
+            <p>Preparando tu enlace de destino...</p>
+        </div>
+
+        <div class="main-content">
+            <div class="redirect-section">
+                <div class="warning-box">
+                    <span class="icon">⚠️</span>
+                    <strong>Aviso:</strong> Estás siendo redirigido a un sitio externo. Por favor espera mientras verificamos la seguridad del enlace.
+                </div>
+
+                <div class="countdown-container">
+                    <div class="countdown-circle">
+                        <div class="countdown-progress" id="countdownProgress"></div>
+                        <div class="countdown-number" id="countdownNumber">5</div>
+                    </div>
+                    <div class="countdown-text">Redirigiendo en <span id="countdownText">5</span> segundos...</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+
+                <div class="destination-info">
+                    <h3>
+                        <span>🎯</span>
+                        Destino del enlace
+                    </h3>
+                    <div class="destination-url" id="destinationUrl">
+                        https://www.ejemplo.com/pagina-de-destino
+                    </div>
+                    <div class="security-info">
+                        <span class="icon">🛡️</span>
+                        <strong>Enlace verificado:</strong> Este enlace ha sido analizado y es seguro para visitar.
+                    </div>
+                </div>
+
+                <button class="continue-btn" id="continueBtn">
+                    ⏳ Espera <span id="btnCountdown">5</span> segundos...
+                </button>
+
+                <div class="stats-info">
+                    <div class="stat-box">
+                        <div class="stat-number">1,247</div>
+                        <div class="stat-label">Clics hoy</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">98.5%</div>
+                        <div class="stat-label">Enlaces seguros</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ads-sidebar">
+                <!-- Banner Ad Unit -->
+                <div class="ad-unit">
+                    <h4>📢 Publicidad</h4>
+                    <div class="ad-placeholder">
+                        <p>Espacio para Banner de PropellerAds</p>
+                        <p>300x250 (Medium Rectangle)</p>
+                    </div>
+                    <!-- Código real de PropellerAds iría aquí -->
+                    <script type="text/javascript">
+                        // PropellerAds Banner Code
+                        /*
+                        (function(d,z,s){
+                        s.src='https://'+d+'/400/'+z;
+                        try{(document.body||document.documentElement).appendChild(s)}
+                        catch(e){}
+                        })('www.propellerads.com','YOUR_BANNER_ZONE_ID',document.createElement('script'))
+                        */
+                    </script>
+                </div>
+
+                <!-- Native Ad Unit -->
+                <div class="ad-unit">
+                    <h4>💡 Contenido Recomendado</h4>
+                    <div class="ad-placeholder">
+                        <p>Espacio para Native Ads de PropellerAds</p>
+                        <p>Anuncios nativos integrados</p>
+                    </div>
+                    <!-- Código para Native Ads -->
+                </div>
+
+                <!-- Video Ad Unit (opcional) -->
+                <div class="ad-unit">
+                    <h4>🎥 Video Promocional</h4>
+                    <div class="ad-placeholder">
+                        <p>Espacio para Video Ads</p>
+                        <p>320x240 Video Player</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup Ad Overlay -->
+    <div class="popup-overlay" id="popupOverlay"></div>
+    <div class="popup-ad" id="popupAd">
+        <button class="close-popup" onclick="closePopup()">&times;</button>
+        <h3>🎁 Oferta Especial</h3>
+        <div class="ad-placeholder" style="margin: 15px 0; min-height: 200px;">
+            <p>Espacio para Popup Ad de PropellerAds</p>
+        </div>
+        <button onclick="closePopup()" style="width: 100%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            Cerrar
+        </button>
+    </div>
+
+    <script>
+        // Configuración
+        const REDIRECT_TIME = 5; // segundos
+        let currentTime = REDIRECT_TIME;
+        let targetUrl = '';
+
+        // Obtener parámetros de URL
+        function getUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return {
+                url: urlParams.get('url') || 'https://www.google.com',
+                shortId: urlParams.get('id') || 'demo123'
+            };
+        }
+
+        // Inicializar página
+        function initializePage() {
+            const params = getUrlParams();
+            targetUrl = decodeURIComponent(params.url);
+            
+            // Mostrar URL de destino
+            document.getElementById('destinationUrl').textContent = targetUrl;
+            
+            // Iniciar countdown
+            startCountdown();
+            
+            // Mostrar popup ad después de 2 segundos
+            setTimeout(showPopupAd, 2000);
+            
+            // Registrar clic para estadísticas
+            registerClick(params.shortId);
+        }
+
+        // Iniciar countdown
+        function startCountdown() {
+            const countdownNumber = document.getElementById('countdownNumber');
+            const countdownText = document.getElementById('countdownText');
+            const btnCountdown = document.getElementById('btnCountdown');
+            const progressFill = document.getElementById('progressFill');
+            const continueBtn = document.getElementById('continueBtn');
+
+            const timer = setInterval(() => {
+                currentTime--;
+                
+                // Actualizar displays
+                countdownNumber.textContent = currentTime;
+                countdownText.textContent = currentTime;
+                btnCountdown.textContent = currentTime;
+                
+                // Actualizar progreso
+                const progressPercent = ((REDIRECT_TIME - currentTime) / REDIRECT_TIME) * 100;
+                progressFill.style.width = progressPercent + '%';
+                
+                // Actualizar círculo de progreso
+                const degrees = (progressPercent / 100) * 360;
+                document.getElementById('countdownProgress').style.background = 
+                    `conic-gradient(from 0deg, rgba(255,255,255,0.3) ${degrees}deg, transparent ${degrees}deg)`;
+                
+                if (currentTime <= 0) {
+                    clearInterval(timer);
+                    enableContinueButton();
+                }
+            }, 1000);
+        }
+
+        // Habilitar botón de continuar
+        function enableContinueButton() {
+            const continueBtn = document.getElementById('continueBtn');
+            continueBtn.classList.add('active');
+            continueBtn.innerHTML = '🚀 Continuar al enlace';
+            continueBtn.onclick = redirectToTarget;
+        }
+
+        // Redirigir al enlace objetivo
+        function redirectToTarget() {
+            // En un caso real, aquí redirigirías al enlace
+            window.location.href = targetUrl;
+        }
+
+        // Mostrar popup ad
+        function showPopupAd() {
+            document.getElementById('popupOverlay').style.display = 'block';
+            document.getElementById('popupAd').style.display = 'block';
+            
+            // Auto-cerrar después de 10 segundos
+            setTimeout(closePopup, 10000);
+        }
+
+        // Cerrar popup
+        function closePopup() {
+            document.getElementById('popupOverlay').style.display = 'none';
+            document.getElementById('popupAd').style.display = 'none';
+        }
+
+        // Registrar clic para estadísticas
+        function registerClick(shortId) {
+            // Aquí enviarías datos a tu servidor para estadísticas
+            console.log(`Clic registrado para: ${shortId}`);
+            
+            // Simular envío de estadísticas
+            fetch('/api/track-click', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    shortId: shortId,
+                    timestamp: new Date().toISOString(),
+                    userAgent: navigator.userAgent,
+                    referrer: document.referrer
+                })
+            }).catch(err => {
+                console.log('Error tracking click:', err);
+            });
+        }
+
+        // Prevenir cierre accidental de la página
+        window.addEventListener('beforeunload', function(e) {
+            if (currentTime > 0) {
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
+            }
+        });
+
+        // Anti-adblocker
+        function checkAdBlocker() {
+            const testAd = document.createElement('div');
+            testAd.innerHTML = '&nbsp;';
+            testAd.className = 'adsbox';
+            testAd.style.position = 'absolute';
+            testAd.style.left = '-10000px';
+            document.body.appendChild(testAd);
+            
+            setTimeout(() => {
+                if (testAd.offsetHeight === 0) {
+                    // AdBlocker detectado
+                    showAdBlockerNotice();
+                }
+                document.body.removeChild(testAd);
+            }, 100);
+        }
+
+        // Mostrar aviso de adblocker
+        function showAdBlockerNotice() {
+            const notice = document.createElement('div');
+            notice.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #ff6b6b;
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                z-index: 10000;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            `;
+            notice.innerHTML = `
+                <strong>⚠️ AdBlocker Detectado</strong><br>
+                Por favor desactiva tu bloqueador de anuncios para apoyar nuestro servicio gratuito.
+            `;
+            document.body.appendChild(notice);
+            
+            // Auto-remover después de 8 segundos
+            setTimeout(() => {
+                if (document.body.contains(notice)) {
+                    document.body.removeChild(notice);
+                }
+            }, 8000);
+        }
+
+        // Inicializar cuando la página carga
+        window.addEventListener('load', () => {
+            initializePage();
+            checkAdBlocker();
+        });
+
+        // Código para PropellerAds Pop-under (se ejecuta al cargar)
+        /*
+        (function(d,z,s){
+        s.src='https://'+d+'/400/'+z;
+        try{(document.body||document.documentElement).appendChild(s)}
+        catch(e){}
+        })('www.propellerads.com','YOUR_POPUNDER_ZONE_ID',document.createElement('script'))
+        */
+
+        // Código para Direct Link (onclick)
+        function propellerAdsClick() {
+            /*
+            window.open('https://www.propellerads.com/direct-link/YOUR_DIRECT_LINK_ID', '_blank');
+            */
+        }
+    </script>
+</body>
+</html>
