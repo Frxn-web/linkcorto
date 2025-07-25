@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta name="monetag" content="662b132f58bccdca2658095898a64ca4">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LinkShort - Acortador de Enlaces</title>
@@ -430,12 +429,13 @@
             }
             
             const shortId = generateShortId();
-            const shortUrl = `https://linkshort.pro/${shortId}`;
+            const redirectUrl = `redirect.html?url=${encodeURIComponent(originalUrl)}&id=${shortId}`;
             
             // Guardar en "base de datos"
             shortLinks[shortId] = {
                 originalUrl: originalUrl,
-                shortUrl: shortUrl,
+                shortUrl: `${window.location.origin}/${shortId}`, // URL para mostrar
+                realUrl: redirectUrl, // URL real para redirección
                 clicks: 0,
                 created: new Date(),
                 earnings: 0
@@ -444,7 +444,7 @@
             linkStats.totalLinks++;
             
             // Mostrar resultado
-            document.getElementById('shortUrlResult').value = shortUrl;
+            document.getElementById('shortUrlResult').value = shortLinks[shortId].shortUrl;
             document.getElementById('resultSection').classList.add('show');
             
             // Limpiar input
@@ -474,8 +474,11 @@
         // Simular clic en enlace acortado
         function simulateClick(shortId) {
             if (shortLinks[shortId]) {
-                // Mostrar anuncio intersticial
-                showInterstitialAd(shortLinks[shortId].originalUrl);
+                // Usar la URL real para redirección
+                const redirectUrl = shortLinks[shortId].realUrl;
+                
+                // Abrir en nueva ventana para simular el comportamiento real
+                window.open(redirectUrl, '_blank');
                 
                 // Incrementar estadísticas
                 shortLinks[shortId].clicks++;
@@ -565,9 +568,11 @@
             
             exampleLinks.forEach(url => {
                 const shortId = generateShortId();
+                const redirectUrl = `redirect.html?url=${encodeURIComponent(url)}&id=${shortId}`;
                 shortLinks[shortId] = {
                     originalUrl: url,
-                    shortUrl: `https://linkshort.pro/${shortId}`,
+                    shortUrl: `${window.location.origin}/${shortId}`,
+                    realUrl: redirectUrl,
                     clicks: Math.floor(Math.random() * 50),
                     created: new Date(),
                     earnings: 0
