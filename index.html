@@ -1,1 +1,604 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkShort - Acortador de Enlaces</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .url-form {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .url-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            min-width: 300px;
+        }
+
+        .url-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .shorten-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .shorten-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .shorten-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-section {
+            display: none;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .result-section.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .short-url {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #e1e5e9;
+            margin-bottom: 15px;
+        }
+
+        .short-url input {
+            flex: 1;
+            border: none;
+            font-size: 16px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .copy-btn {
+            padding: 8px 16px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #218838;
+        }
+
+        .copy-btn.copied {
+            background: #6c757d;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #e1e5e9;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .links-history {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .links-history h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .link-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #e1e5e9;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+        }
+
+        .link-info {
+            flex: 1;
+        }
+
+        .original-url {
+            font-size: 14px;
+            color: #6c757d;
+            word-break: break-all;
+        }
+
+        .short-link {
+            font-weight: 600;
+            color: #667eea;
+            margin-top: 5px;
+        }
+
+        .click-count {
+            background: #667eea;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
+        .ad-space {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin: 30px 0;
+            color: #6c757d;
+        }
+
+        .interstitial-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+        }
+
+        .interstitial-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .countdown {
+            font-size: 24px;
+            color: #667eea;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .skip-btn {
+            display: none;
+            padding: 12px 24px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        .skip-btn:hover {
+            background: #218838;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .main-card {
+                padding: 20px;
+            }
+            
+            .url-form {
+                flex-direction: column;
+            }
+            
+            .url-input {
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔗 LinkShort</h1>
+            <p>Acorta tus enlaces y gana dinero con cada clic</p>
+        </div>
+
+        <div class="main-card">
+            <form class="url-form" id="shortenForm">
+                <input 
+                    type="url" 
+                    class="url-input" 
+                    id="urlInput" 
+                    placeholder="Pega aquí tu enlace largo..."
+                    required
+                >
+                <button type="submit" class="shorten-btn">
+                    Acortar Enlace
+                </button>
+            </form>
+
+            <div class="result-section" id="resultSection">
+                <h3>¡Enlace acortado exitosamente!</h3>
+                <div class="short-url">
+                    <input type="text" id="shortUrlResult" readonly>
+                    <button class="copy-btn" id="copyBtn">Copiar</button>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-number" id="totalClicks">0</div>
+                        <div class="stat-label">Clics Totales</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="totalEarnings">$0.00</div>
+                        <div class="stat-label">Ganancias</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="ctr">0%</div>
+                        <div class="stat-label">CTR Promedio</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Espacio para anuncios de PropellerAds -->
+        <div class="ad-space">
+            <h3>📢 Espacio Publicitario</h3>
+            <p>Aquí se mostrarán los anuncios de PropellerAds</p>
+            <p>Integra tu código de PropellerAds para monetizar</p>
+            <!-- Aquí iría el código real de PropellerAds -->
+            <script type="text/javascript">
+                // Código de ejemplo para PropellerAds
+                // Reemplaza con tu Zone ID real de PropellerAds
+                /*
+                (function(d,z,s){
+                s.src='https://'+d+'/400/'+z;
+                try{(document.body||document.documentElement).appendChild(s)}
+                catch(e){}
+                })('www.propellerads.com',YOUR_ZONE_ID,document.createElement('script'))
+                */
+            </script>
+        </div>
+
+        <div class="links-history">
+            <h2>📊 Historial de Enlaces</h2>
+            <div id="linksContainer">
+                <p style="text-align: center; color: #6c757d;">No hay enlaces acortados aún</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay de anuncio intersticial -->
+    <div class="interstitial-overlay" id="interstitialOverlay">
+        <div class="interstitial-content">
+            <h2>🎯 Anuncio</h2>
+            <p>Por favor espera mientras cargamos tu enlace...</p>
+            <div class="countdown" id="countdown">5</div>
+            <div class="ad-space" style="margin: 20px 0; min-height: 200px;">
+                <p>Aquí se mostraría el anuncio intersticial de PropellerAds</p>
+                <!-- Código de anuncio intersticial de PropellerAds -->
+            </div>
+            <button class="skip-btn" id="skipBtn">Continuar al enlace</button>
+        </div>
+    </div>
+
+    <script>
+        // Base de datos simulada en memoria
+        let shortLinks = {};
+        let linkStats = {
+            totalLinks: 0,
+            totalClicks: 0,
+            totalEarnings: 0
+        };
+
+        // Generar ID corto aleatorio
+        function generateShortId() {
+            const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 8; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        // Acortar URL
+        document.getElementById('shortenForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const urlInput = document.getElementById('urlInput');
+            const originalUrl = urlInput.value.trim();
+            
+            if (!originalUrl) return;
+            
+            // Validar URL
+            try {
+                new URL(originalUrl);
+            } catch {
+                alert('Por favor ingresa una URL válida');
+                return;
+            }
+            
+            const shortId = generateShortId();
+            const shortUrl = `https://linkshort.pro/${shortId}`;
+            
+            // Guardar en "base de datos"
+            shortLinks[shortId] = {
+                originalUrl: originalUrl,
+                shortUrl: shortUrl,
+                clicks: 0,
+                created: new Date(),
+                earnings: 0
+            };
+            
+            linkStats.totalLinks++;
+            
+            // Mostrar resultado
+            document.getElementById('shortUrlResult').value = shortUrl;
+            document.getElementById('resultSection').classList.add('show');
+            
+            // Limpiar input
+            urlInput.value = '';
+            
+            // Actualizar historial
+            updateLinksHistory();
+            updateStats();
+        });
+
+        // Copiar enlace
+        document.getElementById('copyBtn').addEventListener('click', function() {
+            const shortUrlInput = document.getElementById('shortUrlResult');
+            shortUrlInput.select();
+            document.execCommand('copy');
+            
+            const copyBtn = document.getElementById('copyBtn');
+            copyBtn.textContent = '¡Copiado!';
+            copyBtn.classList.add('copied');
+            
+            setTimeout(() => {
+                copyBtn.textContent = 'Copiar';
+                copyBtn.classList.remove('copied');
+            }, 2000);
+        });
+
+        // Simular clic en enlace acortado
+        function simulateClick(shortId) {
+            if (shortLinks[shortId]) {
+                // Mostrar anuncio intersticial
+                showInterstitialAd(shortLinks[shortId].originalUrl);
+                
+                // Incrementar estadísticas
+                shortLinks[shortId].clicks++;
+                shortLinks[shortId].earnings += 0.002; // $0.002 por clic (ejemplo)
+                linkStats.totalClicks++;
+                linkStats.totalEarnings += 0.002;
+                
+                updateLinksHistory();
+                updateStats();
+            }
+        }
+
+        // Mostrar anuncio intersticial
+        function showInterstitialAd(targetUrl) {
+            const overlay = document.getElementById('interstitialOverlay');
+            const countdown = document.getElementById('countdown');
+            const skipBtn = document.getElementById('skipBtn');
+            
+            overlay.style.display = 'block';
+            let timeLeft = 5;
+            
+            const timer = setInterval(() => {
+                timeLeft--;
+                countdown.textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    skipBtn.style.display = 'block';
+                }
+            }, 1000);
+            
+            skipBtn.onclick = function() {
+                overlay.style.display = 'none';
+                // En un caso real, redirigir a targetUrl
+                alert(`Redirigiendo a: ${targetUrl}`);
+            };
+        }
+
+        // Actualizar historial de enlaces
+        function updateLinksHistory() {
+            const container = document.getElementById('linksContainer');
+            
+            if (Object.keys(shortLinks).length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #6c757d;">No hay enlaces acortados aún</p>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            Object.entries(shortLinks).forEach(([shortId, data]) => {
+                const linkItem = document.createElement('div');
+                linkItem.className = 'link-item';
+                linkItem.innerHTML = `
+                    <div class="link-info">
+                        <div class="short-link">${data.shortUrl}</div>
+                        <div class="original-url">${data.originalUrl}</div>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <span class="click-count">${data.clicks} clics</span>
+                        <button onclick="simulateClick('${shortId}')" style="margin-left: 10px; padding: 5px 10px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            Probar Clic
+                        </button>
+                    </div>
+                `;
+                container.appendChild(linkItem);
+            });
+        }
+
+        // Actualizar estadísticas
+        function updateStats() {
+            document.getElementById('totalClicks').textContent = linkStats.totalClicks;
+            document.getElementById('totalEarnings').textContent = `$${linkStats.totalEarnings.toFixed(4)}`;
+            
+            const ctr = linkStats.totalLinks > 0 ? 
+                ((linkStats.totalClicks / linkStats.totalLinks) * 100).toFixed(1) : 0;
+            document.getElementById('ctr').textContent = `${ctr}%`;
+        }
+
+        // Inicializar con algunos enlaces de ejemplo
+        setTimeout(() => {
+            // Simular algunos enlaces para demostración
+            const exampleLinks = [
+                'https://www.google.com',
+                'https://www.youtube.com',
+                'https://www.facebook.com'
+            ];
+            
+            exampleLinks.forEach(url => {
+                const shortId = generateShortId();
+                shortLinks[shortId] = {
+                    originalUrl: url,
+                    shortUrl: `https://linkshort.pro/${shortId}`,
+                    clicks: Math.floor(Math.random() * 50),
+                    created: new Date(),
+                    earnings: 0
+                };
+            });
+            
+            // Calcular estadísticas iniciales
+            Object.values(shortLinks).forEach(link => {
+                linkStats.totalClicks += link.clicks;
+                linkStats.totalEarnings += link.clicks * 0.002;
+            });
+            linkStats.totalLinks = Object.keys(shortLinks).length;
+            
+            updateLinksHistory();
+            updateStats();
+        }, 1000);
+
+        // Integración con PropellerAds (comentado para ejemplo)
+        /*
+        // Código de PropellerAds para Pop-under
+        (function(d,z,s){
+            s.src='https://'+d+'/400/'+z;
+            try{(document.body||document.documentElement).appendChild(s)}
+            catch(e){}
+        })('www.propellerads.com','YOUR_ZONE_ID',document.createElement('script'));
+
+        // Código para Banner
+        // Insertar en el div .ad-space
+
+        // Código para anuncios intersticiales
+        // Se ejecuta cuando el usuario hace clic en un enlace acortado
+        */
+    </script>
+</body>
+</html>
