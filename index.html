@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LinkShort - Acortador de Enlaces</title>
+    
+    <!-- Script de anuncios agregado -->
+    <script src="https://fpyf8.com/88/tag.min.js" data-zone="161463" async data-cfasync="false"></script>
+    
     <style>
         * {
             margin: 0;
@@ -177,6 +181,25 @@
             margin-top: 5px;
         }
 
+        .ad-space {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            margin: 30px 0;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            min-height: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .ad-space h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
         .links-history {
             background: white;
             border-radius: 20px;
@@ -224,16 +247,6 @@
             border-radius: 15px;
             font-size: 12px;
             margin-left: 10px;
-        }
-
-        .ad-space {
-            background: #f8f9fa;
-            border: 2px dashed #dee2e6;
-            border-radius: 15px;
-            padding: 40px;
-            text-align: center;
-            margin: 30px 0;
-            color: #6c757d;
         }
 
         .interstitial-overlay {
@@ -351,23 +364,11 @@
             </div>
         </div>
 
-        <!-- Espacio para anuncios de PropellerAds -->
-        <div class="ad-space">
-            <h3>📢 Espacio Publicitario</h3>
-            <p>Aquí se mostrarán los anuncios de PropellerAds</p>
-            <p>Integra tu código de PropellerAds para monetizar</p>
-            <!-- Aquí iría el código real de PropellerAds -->
-            <script type="text/javascript">
-                // Código de ejemplo para PropellerAds
-                // Reemplaza con tu Zone ID real de PropellerAds
-                /*
-                (function(d,z,s){
-                s.src='https://'+d+'/400/'+z;
-                try{(document.body||document.documentElement).appendChild(s)}
-                catch(e){}
-                })('www.propellerads.com',YOUR_ZONE_ID,document.createElement('script'))
-                */
-            </script>
+        <!-- Espacio para anuncios -->
+        <div class="ad-space" id="mainAdSpace">
+            <h3>📢 Anuncios</h3>
+            <p>Los anuncios se cargarán aquí automáticamente</p>
+            <!-- El script de anuncios se cargará en este espacio -->
         </div>
 
         <div class="links-history">
@@ -385,8 +386,8 @@
             <p>Por favor espera mientras cargamos tu enlace...</p>
             <div class="countdown" id="countdown">5</div>
             <div class="ad-space" style="margin: 20px 0; min-height: 200px;">
-                <p>Aquí se mostraría el anuncio intersticial de PropellerAds</p>
-                <!-- Código de anuncio intersticial de PropellerAds -->
+                <p>Espacio para anuncio intersticial</p>
+                <!-- Aquí también se pueden mostrar anuncios -->
             </div>
             <button class="skip-btn" id="skipBtn">Continuar al enlace</button>
         </div>
@@ -453,6 +454,11 @@
             // Actualizar historial
             updateLinksHistory();
             updateStats();
+            
+            // Trigger ad refresh after URL shortening (opcional)
+            if (typeof window.adsbygoogle !== 'undefined') {
+                // Refresh ads if using other ad networks
+            }
         });
 
         // Copiar enlace
@@ -474,11 +480,8 @@
         // Simular clic en enlace acortado
         function simulateClick(shortId) {
             if (shortLinks[shortId]) {
-                // Usar la URL real para redirección
-                const redirectUrl = shortLinks[shortId].realUrl;
-                
-                // Abrir en nueva ventana para simular el comportamiento real
-                window.open(redirectUrl, '_blank');
+                // Mostrar anuncio intersticial antes de redirigir
+                showInterstitialAd(shortLinks[shortId].originalUrl);
                 
                 // Incrementar estadísticas
                 shortLinks[shortId].clicks++;
@@ -513,7 +516,7 @@
             skipBtn.onclick = function() {
                 overlay.style.display = 'none';
                 // En un caso real, redirigir a targetUrl
-                alert(`Redirigiendo a: ${targetUrl}`);
+                window.open(targetUrl, '_blank');
             };
         }
 
@@ -590,21 +593,10 @@
             updateStats();
         }, 1000);
 
-        // Integración con PropellerAds (comentado para ejemplo)
-        /*
-        // Código de PropellerAds para Pop-under
-        (function(d,z,s){
-            s.src='https://'+d+'/400/'+z;
-            try{(document.body||document.documentElement).appendChild(s)}
-            catch(e){}
-        })('www.propellerads.com','YOUR_ZONE_ID',document.createElement('script'));
-
-        // Código para Banner
-        // Insertar en el div .ad-space
-
-        // Código para anuncios intersticiales
-        // Se ejecuta cuando el usuario hace clic en un enlace acortado
-        */
+        // Detectar cuando los anuncios están listos
+        window.addEventListener('load', function() {
+            console.log('Página cargada - Los anuncios deberían estar activos');
+        });
     </script>
 </body>
 </html>
